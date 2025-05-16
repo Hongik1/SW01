@@ -1,0 +1,43 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Git 소스코드 체크아웃
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // 자바 파일 컴파일
+                sh 'mkdir -p classes && javac -encoding UTF-8 -d classes Practice/src/**/*.java'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    // JUnit 실행에 필요한 classpath 구성
+                    def classpath = "classes:lib/:path/to/eclipse/plugins/junit-platform-console-standalone-1.7.1.jar"
+                    sh "java -cp ${classpath} org.junit.platform.console.ConsoleLauncher --scan-classpath > test_results.txt"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'test_results.txt'
+        }
+
+        failure {
+            echo '💥 Build or test failed!'
+        }
+
+        success {
+            echo '✅ Build and test succeeded!'
+        }
+    }
+}

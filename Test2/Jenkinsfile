@@ -5,8 +5,10 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''
-                    mkdir -p classes
-                    javac -encoding UTF-8 -d classes src/calculator/*.java src/student/*.java
+                    cd Test2
+                    mkdir -p ../classes
+                    find src -name "*.java" > sources.txt
+                    javac -encoding UTF-8 -d ../classes @sources.txt
                 '''
             }
         }
@@ -14,11 +16,12 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    java -jar lib/junit-platform-console-standalone-*.jar \
-                         --class-path classes \
+                    cd Test2
+                    java -jar ../lib/junit-platform-console-standalone-*.jar \
+                         --class-path ../classes \
                          --scan-class-path \
-                         --details tree \
-                         --reports-dir test-reports
+                         --details theme=ascii \
+                         --reports-dir ../test-reports
                 '''
             }
         }
